@@ -2,40 +2,51 @@ package models
 
 import (
 	"errors"
+	"log"
 
 	"github.com/kamva/mgm/v3"
+	"github.com/rs/xid"
 	"go.mongodb.org/mongo-driver/bson"
 
 	encry "gin_msg/encryption"
 )
 
+type Update struct {
+	Event   string
+	Payload interface{}
+}
+
 type User struct {
 	mgm.DefaultModel `bson:", inline"`
-	Username string
-	Email string
-	Password string
-	PhotoUrl string
-	Rooms []string
-	BlackListTokens []string
+	Id               string
+	Username         string
+	Email            string
+	Password         string
+	PhotoUrl         string
+	Rooms            []string
+	BlackListTokens  []string
+	Updates          []Update
 }
 
 func NewUser(username string, email string, password string, photoUrl string) (string, error) {
 	if err := mgm.Coll(&User{}).First(bson.M{"username": username}, &User{}); err != nil {
 		if err.Error() == "mongo: no documents in result" {
-			if hashedPassword, err  := encry.Hashing(password); err != nil {
+			if hashedPassword, err := encry.Hashing(password); err != nil {
 				return "", err
 			} else {
+				id := xid.New().String()
 				newUser := &User{
+					Id:       id,
 					Username: username,
-					Email: email,
+					Email:    email,
 					Password: hashedPassword,
 					PhotoUrl: photoUrl,
-					Rooms: []string{},
+					Rooms:    []string{},
 				}
 				if err := mgm.Coll(newUser).Create(newUser); err != nil {
 					return "", err
 				}
-				return newUser.ID.Hex(), nil
+				return id, nil
 			}
 		} else {
 			return "", err
@@ -45,17 +56,44 @@ func NewUser(username string, email string, password string, photoUrl string) (s
 	}
 }
 
-func NewUserLogin(username string, password string) (string, error) {
+func NewUserLogin(username string, password string) (string, string, error) {
 	user := &User{}
-	if err := mgm.Coll(&User{}).First(bson.M{"username": username}, user); err != nil {
-		return "", err
+	if err := mgm.Coll(user).First(bson.M{"username": username}, user); err != nil {
+		return "", "", err
 	}
 	if err := encry.CompareHash(user.Password, password); err != nil {
-		return "", err
+		return "", "", err
 	}
-	token, err := encry.CreateToken(user.ID.Hex())
+	token, refresh, err := encry.CreateTokenPair(user.Id)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
-	return token, nil
+	return token, refresh, nil
+}
+
+func RefreshTokens(refreshToken string) (string, string, error) {
+	userId, err := encry.VerifyToken(refreshToken)
+	if err != nil {
+		return "", "", err
+	}
+	user, err := GetUser(userId)
+	if err != nil {
+		return "", "", err
+	}
+	user.BlackListTokens = append(user.BlackListTokens, refreshToken)
+	token, refresh, err := encry.CreateTokenPair(user.ID.Hex())
+	if err != nil {
+		return "", "", err
+	}
+	return token, refresh, nil
+}
+
+func GetUser(userId string) (*User, error) {
+	log.Println("Get user", userId)
+	user := &User{}
+	if err := mgm.Coll(user).First(bson.M{"id": userId}, user); err != nil {
+		return &User{}, err
+	} else {
+		return user, nil
+	}
 }
