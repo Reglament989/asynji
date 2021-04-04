@@ -19,6 +19,7 @@ type Update struct {
 type User struct {
 	mgm.DefaultModel `bson:", inline"`
 	Id               string
+	FcmTokens				[]string
 	Username         string
 	Email            string
 	Password         string

@@ -1,0 +1,24 @@
+version: "3"
+services:
+  db:
+    image: mongo
+    container_name: db
+    restart: always
+    volumes:
+      - ./release/mongodata:/data/db
+    command: --quiet
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: root
+    #   MONGO_INITDB_ROOT_PASSWORD: example
+  backend:
+    image: golang
+    build: .
+    depends_on:
+      - db
+    container_name: backend
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      GIN_MODE: release
+      MONGO_URI: mongodb://db:27017

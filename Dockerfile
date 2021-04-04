@@ -1,13 +1,13 @@
-FROM golang:1.14
+FROM golang
 
-ENV PORT 3000
-EXPOSE 3000:8081
+EXPOSE 8080:8080
 
-WORKDIR /go/src/app
+COPY . /go/src/gin_msg
 
-COPY . .
+WORKDIR /go/src/gin_msg
 
-RUN go get -d -v ./...
-RUN go install -v ./...
 
-CMD ["app"]
+RUN go build
+RUN go install
+
+CMD ["gin_msg"]

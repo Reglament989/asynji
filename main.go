@@ -7,9 +7,14 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+  if err != nil {
+    panic("Error loading .env file")
+  }
 	InitMongo()
 	r := gin.New()
 
@@ -28,6 +33,8 @@ func main() {
 
 	r.GET("/", middlewares.Auth(), router.IndexRoute)
 
+	// r.GET("/ws", ws.ListenChanges)
+
 	userScope := r.Group("/user")
 
 	userScope.POST("/create", router.CreateUserRoute)
@@ -41,6 +48,8 @@ func main() {
 	roomScope := r.Group("/room", middlewares.Auth())
 
 	roomScope.POST("/create", router.CreateRoomRoute)
+
+	roomScope.POST("/invite", router.InviteRoomRoute)
 
 	r.Run()
 }
