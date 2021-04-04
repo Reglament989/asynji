@@ -1,8 +1,6 @@
 package models
 
 import (
-	"gin_msg/api"
-
 	"github.com/kamva/mgm/v3"
 	"github.com/rs/xid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -56,7 +54,6 @@ func InviteNewMember(userId string, roomId string) (bool, error) {
 	if err := mgm.Coll(user).First(bson.M{"id": userId}, user); err != nil {
 		return false, err
 	}
-	api.SendNotifyNewMemberInRoom(room.FcmTokens)
 	room.FcmTokens = append(room.FcmTokens, user.FcmTokens...)
 	room.Members = append(room.Members, userId)
 	room.Saving()

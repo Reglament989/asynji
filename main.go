@@ -2,12 +2,16 @@ package main
 
 import (
 	"fmt"
-	"gin_msg/middlewares"
-	router "gin_msg/routes"
+	"gin_msg/ws"
+	"log"
+	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"golang.org/x/sync/errgroup"
+)
+var (
+	g errgroup.Group
 )
 
 func main() {
@@ -16,40 +20,36 @@ func main() {
     panic("Error loading .env file")
   }
 	InitMongo()
-	r := gin.New()
+	
+	r := InitGin()
 
-	r.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
+	g.Go(func () error{
+		h := ws.InitWs()
+		s := &http.Server{
+			Addr:         ":8081",
+			Handler:      h,
+			ReadTimeout:  5 * time.Second,
+			WriteTimeout: 10 * time.Second,
+		}
+		fmt.Println("\033[32mWs now online on 8081!\033[39m")
+		err := s.ListenAndServe()
+		return err
+	})
 
-		// your custom format
-		return fmt.Sprintf("\033[34m[%s]\033[39m %s - %s \033[36m[%d]\033[39m ~ \033[33m%s\033[39m\n",
-			param.TimeStamp.Format(time.Stamp),
-			param.Method,
-			param.Path,
-			param.StatusCode,
-			param.Latency,
-		)
-	}))
-	r.Use(gin.Recovery())
+	g.Go(func () error {
+		s := &http.Server{
+			Addr:         ":8080",
+			Handler:      r,
+			ReadTimeout:  5 * time.Second,
+			WriteTimeout: 10 * time.Second,
+		}
+		fmt.Println("\033[32mBackend now online on 8080!\033[39m")
+		err := s.ListenAndServe()
+		return err
+	})
 
-	r.GET("/", middlewares.Auth(), router.IndexRoute)
-
-	// r.GET("/ws", ws.ListenChanges)
-
-	userScope := r.Group("/user")
-
-	userScope.POST("/create", router.CreateUserRoute)
-
-	authScope := r.Group("/auth")
-
-	authScope.POST("/login", router.LoginRoute)
-
-	authScope.POST("/refresh", router.RefreshRoute)
-
-	roomScope := r.Group("/room", middlewares.Auth())
-
-	roomScope.POST("/create", router.CreateRoomRoute)
-
-	roomScope.POST("/invite", router.InviteRoomRoute)
-
-	r.Run()
+	if err := g.Wait(); err != nil {
+		log.Fatal(err)
+	}
+	
 }

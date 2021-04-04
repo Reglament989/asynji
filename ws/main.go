@@ -1,34 +1,21 @@
-package main
+package ws
 
 import (
-	"log"
-	"net"
+	"net/http"
 
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
 )
 
-func main() {
-	ln, err := net.Listen("tcp", "localhost:8080")
-	log.Println("Started at 8080")
-	if err != nil {
-		// handle error
-	}
-
-	// Prepare handshake header writer from http.Header mapping.
-
-	u := ws.Upgrader{}
-	for {
-		conn, err := ln.Accept()
+func InitWs() http.HandlerFunc {
+	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		conn, _, _, err := ws.UpgradeHTTP(r, w)
 		if err != nil {
-			log.Fatal(err)
-		}
-		_, err = u.Upgrade(conn)
-		if err != nil {
-			log.Printf("upgrade error: %s", err)
+			// handle error
 		}
 		go func() {
 			defer conn.Close()
+
 			for {
 				msg, op, err := wsutil.ReadClientData(conn)
 				if err != nil {
@@ -40,5 +27,6 @@ func main() {
 				}
 			}
 		}()
-	}
+	})
+	return h
 }
