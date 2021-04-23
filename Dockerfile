@@ -2,12 +2,12 @@ FROM golang
 
 EXPOSE 8080:8080
 
-COPY . /go/src/gin_msg
+COPY . /go/src/asynji
 
-WORKDIR /go/src/gin_msg
+WORKDIR /go/src/asynji
 
 
 RUN go build
 RUN go install
 
-CMD ["gin_msg"]
+CMD ["asynji"]

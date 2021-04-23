@@ -6,13 +6,13 @@ import (
 
 func main() {
 	err := godotenv.Load()
-  if err != nil {
-    panic("Error loading .env file")
-  }
+	if err != nil {
+		panic("Error loading .env file")
+	}
 	InitMongo()
-	
+
 	r := InitGin()
 
 	r.Run()
-	
+
 }

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"asynji/middlewares"
 	router "asynji/routes"
+	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
