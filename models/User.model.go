@@ -8,7 +8,7 @@ import (
 	"github.com/rs/xid"
 	"go.mongodb.org/mongo-driver/bson"
 
-	encry "gin_msg/encryption"
+	encry "asynji/encryption"
 )
 
 type Update struct {

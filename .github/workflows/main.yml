@@ -1,0 +1,48 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  # pull_request:
+  #   branches: [ master ]
+
+jobs:
+  build:
+    if: "!contains(github.event.head_commit.message, 'no ci')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Test
+        run: go test -v ./...
+
+      - name: Save execution of linux
+        uses: actions/upload-artifact@v2
+        with:
+          path: ./asynji
+
+      - name: Slack notify
+        uses: 8398a7/action-slack@v3
+        with:
+          job_name: Build
+          status: custom
+          fields: workflow,job,commit,repo,author,took,message,eventName
+          custom_payload: |
+            {
+              text: `Workflow: ${process.env.AS_WORKFLOW}\tMessage: ${process.env.AS_MESSAGE}\nEvent: ${process.env.AS_EVENT_NAME}\tAuthor: ${process.env.AS_AUTHOR}`,
+              attachments: [{
+                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                text: `Build (${process.env.AS_COMMIT}) of ${process.env.AS_REPO} ${{ job.status }} in ${process.env.AS_TOOK}`,
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }} # required
+        if: always() # Pick up events even if the job fails or is canceled.
