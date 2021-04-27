@@ -16,12 +16,21 @@ services:
     restart: always
     volumes:
       - ./gorush-config.yml:/config.yml
+  pusher:
+    image: golang
+    build: ./pkgs/pusher
+    depends_on:
+      - gorush
+    container_name: pusher
+    restart: always
+    environment:
+      GORUSH_URL: http://gorush:8088
   backend:
     image: golang
-    build: ./src
+    build: ./pkgs/asynji
     depends_on:
       - db
-      - gorush
+      - pusher
     container_name: backend
     restart: always
     ports:

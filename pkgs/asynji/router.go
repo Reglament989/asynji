@@ -1,10 +1,11 @@
 package main
 
 import (
-	"asynji/middlewares"
-	router "asynji/routes"
 	"fmt"
 	"time"
+
+	"github.com/Reglament989/asynji/pkgs/asynji/middlewares"
+	router "github.com/Reglament989/asynji/pkgs/asynji/routes"
 
 	"github.com/gin-gonic/gin"
 )

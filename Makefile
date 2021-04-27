@@ -1,10 +1,10 @@
 dev:
-	cd src && air & cd lib/push-service && air
+	cd pkgs/asynji && air & cd pkgs/pusher && air
 
 build:
 	mkdir build
-	cd src && go build -o ../build/asynji
-	cd lib/push-service && go build -o ../../build/push-service 
+	cd pkgs/asynji && go build -o ../../build/asynji
+	cd pkgs/pusher && go build -o ../../build/push-service 
 	go test -v ./...
 
 run:
