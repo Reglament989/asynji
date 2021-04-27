@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"asynji/src/encryption"
+	"asynji/encryption"
 	"strings"
 
 	"github.com/gin-gonic/gin"

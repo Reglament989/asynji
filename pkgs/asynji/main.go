@@ -1,7 +1,7 @@
 package main
 
 import (
-	"asynji/src/rdb"
+	"asynji/rdb"
 
 	"github.com/joho/godotenv"
 )

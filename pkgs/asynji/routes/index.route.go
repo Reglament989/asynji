@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"asynji/src/rdb"
+	"asynji/rdb"
 
 	"github.com/gin-gonic/gin"
 )

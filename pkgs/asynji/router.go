@@ -1,8 +1,8 @@
 package main
 
 import (
-	"asynji/src/middlewares"
-	router "asynji/src/routes"
+	"asynji/middlewares"
+	router "asynji/routes"
 	"fmt"
 	"time"
 

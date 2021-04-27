@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	avro "asynji/lib/push-service/avro"
+	// avro "push_service/avro"
 
 	"github.com/go-redis/redis/v8"
 )
