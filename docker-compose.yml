@@ -10,11 +10,18 @@ services:
     # environment:
     #   MONGO_INITDB_ROOT_USERNAME: root
     #   MONGO_INITDB_ROOT_PASSWORD: example
+  gorush:
+    image: appleboy/gorush
+    container_name: gorush
+    restart: always
+    volumes:
+      - ./gorush-config.yml:/config.yml
   backend:
     image: golang
-    build: .
+    build: ./src
     depends_on:
       - db
+      - gorush
     container_name: backend
     restart: always
     ports:

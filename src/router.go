@@ -1,8 +1,8 @@
 package main
 
 import (
-	"asynji/middlewares"
-	router "asynji/routes"
+	"asynji/src/middlewares"
+	router "asynji/src/routes"
 	"fmt"
 	"time"
 
@@ -25,7 +25,7 @@ func InitGin() *gin.Engine {
 	}))
 	r.Use(gin.Recovery())
 
-	r.GET("/", middlewares.Auth(), router.IndexRoute)
+	r.GET("/", router.IndexRoute)
 
 	// r.GET("/ws", ws.ListenChanges)
 

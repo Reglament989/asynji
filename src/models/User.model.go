@@ -8,7 +8,7 @@ import (
 	"github.com/rs/xid"
 	"go.mongodb.org/mongo-driver/bson"
 
-	encry "asynji/encryption"
+	encry "asynji/src/encryption"
 )
 
 type Update struct {
@@ -19,7 +19,7 @@ type Update struct {
 type User struct {
 	mgm.DefaultModel `bson:", inline"`
 	Id               string
-	FcmTokens				[]string
+	FcmTokens        []string
 	Username         string
 	Email            string
 	Password         string

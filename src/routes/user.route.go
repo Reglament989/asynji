@@ -3,7 +3,7 @@ package routes
 import (
 	"net/http"
 
-	models "asynji/models"
+	models "asynji/src/models"
 
 	"github.com/gin-gonic/gin"
 )
