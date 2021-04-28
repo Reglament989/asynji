@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"time"
 
 	"github.com/go-bongo/bongo"
 	"github.com/rs/xid"
@@ -32,18 +33,25 @@ type Room struct {
 	Members            []string
 	Messages           []Message
 	FcmTokens          []string
+	InviteCodes        []string
+}
+
+func (r *Room) Save() {
+	col := Conn.Collection("Rooms")
+	col.Save(r)
 }
 
 func CreateNewRoom(roomName string, avatar string, owner string) (string, error) {
 	col := Conn.Collection("Rooms")
 	var newRoom = &Room{
-		RoomName:   roomName,
-		Avatar:     avatar,
-		Owner:      owner,
-		InviteCode: xid.New().String(),
-		Hidden:     true,
-		Members:    []string{owner},
-		Messages:   []Message{},
+		RoomName:    roomName,
+		Avatar:      avatar,
+		Owner:       owner,
+		InviteCode:  xid.New().String(),
+		Hidden:      true,
+		Members:     []string{owner},
+		Messages:    []Message{},
+		InviteCodes: []string{},
 	}
 	err := col.Save(newRoom)
 	if err != nil {
@@ -63,17 +71,41 @@ func GetRoom(id string) (*Room, error) {
 	return room, nil
 }
 
-func InviteNewMember(userId string, roomId string) (bool, error) {
-	// var room = &Room{}
-	// if err := mgm.Coll(room).First(bson.M{"id": roomId}, room); err != nil {
-	// 	return false, err
-	// }
-	// var user = &User{}
-	// if err := mgm.Coll(user).First(bson.M{"id": userId}, user); err != nil {
-	// 	return false, err
-	// }
-	// room.FcmTokens = append(room.FcmTokens, user.FcmTokens...)
-	// room.Members = append(room.Members, userId)
-	// room.Saving()
-	return false, errors.New("not implimented")
+func (r *Room) InviteNewMembers(invites []string, sender string) string {
+	message := ""
+	for idx := range invites {
+		u, err := GetUser(invites[idx])
+		if err != nil {
+			message += invites[idx] + "Skiped because user not found.\n"
+			continue
+		}
+		inviteId := xid.New().String()
+		u.Updates = append(u.Updates, Update{
+			Invite: Invite{From: sender, To: r.Id.Hex(), When: time.Now().Format(time.RubyDate), InviteId: inviteId},
+		})
+		u.Save()
+		r.InviteCodes = append(r.InviteCodes, inviteId)
+	}
+	r.Save()
+	if message == "" {
+		message = "All invites sended"
+	}
+	return message
+}
+
+func (r *Room) AcceptInvite(inviteId string, user *User) error {
+	if yeah, idx := StringInSlice(inviteId, r.InviteCodes); yeah {
+		r.Members = append(r.Members, user.Id.Hex())
+		r.FcmTokens = append(r.FcmTokens, user.FcmTokens...)
+		Remove(r.InviteCodes, idx)
+		r.Save()
+		return nil
+	} else {
+		return errors.New("Invite code invalid")
+	}
+}
+
+func Remove(s []string, i int) []string {
+	s[len(s)-1], s[i] = s[i], s[len(s)-1]
+	return s[:len(s)-1]
 }

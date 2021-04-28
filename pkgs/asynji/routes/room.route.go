@@ -56,9 +56,10 @@ func CreateRoomRoute(c *gin.Context) {
 }
 
 type InviteRoomBody struct {
-	roomIdToJoin string
+	InvitedList []string `json:"invited_list"`
 }
 
+// [POST] /room/:roomid/invite
 func InviteRoomRoute(c *gin.Context) {
 	var body InviteRoomBody
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -67,21 +68,71 @@ func InviteRoomRoute(c *gin.Context) {
 		})
 		return
 	}
-	invited, err := models.InviteNewMember(c.GetString("userId"), body.roomIdToJoin)
+	room, err := models.GetRoom(c.Param("roomid"))
 	if err != nil {
 		c.JSON(500, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
-	if invited {
-		c.JSON(201, gin.H{
-			"message": "Welcome to new room",
+	if yeah, _ := models.StringInSlice(c.Param("userId"), room.Members); yeah {
+		message := room.InviteNewMembers(body.InvitedList, c.Param("userId"))
+		if message == "All invites sended" {
+			c.JSON(201, gin.H{
+				"message": message,
+			})
+			return
+		}
+		c.JSON(200, gin.H{
+			"error":   message,
+			"message": "Some users skipped",
 		})
 		return
 	}
-	c.JSON(401, gin.H{
-		"message": "You not invited to room",
+	c.JSON(400, gin.H{
+		"error": "Room not found",
+	})
+}
+
+// [GET] "/:roomid/invite/:inviteid/resolve"
+func AcceptInviteRoute(c *gin.Context) {
+	roomid := c.Param("roomid")
+	inviteid := c.Param("inviteid")
+	user, err := models.GetUser(c.Param("userId"))
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	room, err := models.GetRoom(roomid)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	err = room.AcceptInvite(inviteid, user)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, gin.H{
+		"message": "Welcome to new room",
+	})
+}
+
+// [GET] "/:roomid/invite/:inviteid/discard"
+func DiscardInviteRoute(c *gin.Context) {
+	roomid := c.Param("roomid")
+	inviteid := c.Param("inviteid")
+	room, err := models.GetRoom(roomid)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	if yeah, idx := models.StringInSlice(inviteid, room.InviteCodes); yeah {
+		models.Remove(room.InviteCodes, idx)
+		room.Save()
+	}
+	c.JSON(200, gin.H{
+		"message": "Welcome to new room",
 	})
 }
 
@@ -108,7 +159,7 @@ func NewMessageRoute(c *gin.Context) {
 		c.JSON(500, gin.H{"error": err1.Error()})
 		return
 	}
-	if models.StringInSlice(sender.Id.Hex(), room.Members) {
+	if yeah, _ := models.StringInSlice(sender.Id.Hex(), room.Members); yeah {
 		ids, err := room.NewMessage(sender.Id.Hex(), body.Body)
 		if err != nil {
 			c.JSON(500, gin.H{"error": err1.Error()})

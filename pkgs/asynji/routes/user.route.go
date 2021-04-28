@@ -55,3 +55,27 @@ func CreateUserRoute(c *gin.Context) {
 		})
 	}
 }
+
+type UploadFcmTokenBody struct {
+	Token string
+}
+
+func UploadFcmToken(c *gin.Context) {
+	var body UploadFcmTokenBody
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	user, err := models.GetUser(c.GetString("userId"))
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	user.FcmTokens = append(user.FcmTokens, body.Token)
+	user.Save()
+	c.JSON(200, gin.H{
+		"message": "Saved",
+	})
+}

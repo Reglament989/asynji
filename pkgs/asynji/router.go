@@ -34,6 +34,12 @@ func InitGin() *gin.Engine {
 
 	userScope.POST("/create", router.CreateUserRoute)
 
+	userScope.POST("/upload/fcm", router.UploadFcmToken)
+
+	// userScope.POST("/upload/public", router.UploadFcmToken)
+
+	// userScope.POST("/:userid/public", router.UploadFcmToken)
+
 	authScope := r.Group("/auth")
 
 	authScope.POST("/login", router.LoginRoute)
@@ -45,6 +51,10 @@ func InitGin() *gin.Engine {
 	roomScope.POST("/create", router.CreateRoomRoute)
 
 	roomScope.POST("/:roomid/invite", router.InviteRoomRoute)
+
+	roomScope.GET("/:roomid/invite/:inviteid/resolve", router.AcceptInviteRoute)
+
+	roomScope.POST("/:roomid/invite/:inviteid/discard", router.DiscardInviteRoute)
 
 	roomScope.POST("/:roomid/send", router.NewMessageRoute)
 

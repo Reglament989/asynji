@@ -12,13 +12,14 @@ import (
 )
 
 type Invite struct {
-	From string
-	To   string
-	When string
+	From     string
+	To       string
+	When     string
+	InviteId string
 }
 
 type Update struct {
-	Invites []Invite
+	Invite Invite
 }
 
 type User struct {
@@ -31,6 +32,11 @@ type User struct {
 	Rooms              []string
 	BlackListTokens    []string
 	Updates            []Update
+}
+
+func (u *User) Save() {
+	col := Conn.Collection("Users")
+	col.Save(u)
 }
 
 func NewUser(username string, email string, password string, photoUrl string) (string, error) {
@@ -84,7 +90,7 @@ func RefreshTokens(refreshToken string) (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
-	if StringInSlice(refreshToken, user.BlackListTokens) {
+	if yeah, _ := StringInSlice(refreshToken, user.BlackListTokens); yeah {
 		return "", "", errors.New("token invalid")
 	}
 	user.BlackListTokens = append(user.BlackListTokens, refreshToken)
@@ -111,11 +117,11 @@ func GetUser(userId string) (*User, error) {
 	}
 }
 
-func StringInSlice(a string, list []string) bool {
-	for _, b := range list {
+func StringInSlice(a string, list []string) (bool, int) {
+	for i, b := range list {
 		if b == a {
-			return true
+			return true, i
 		}
 	}
-	return false
+	return false, 0
 }
