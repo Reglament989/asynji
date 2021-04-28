@@ -7,7 +7,7 @@ COPY . /go/src/pusher
 WORKDIR /go/src/pusher
 
 
-RUN go build
-RUN go install
+RUN cd ./pkgs/pusher && go build -o ../../pusher
+# RUN cd ./pkgs/pusher && go install
 
 CMD ["pusher"]

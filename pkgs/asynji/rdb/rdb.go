@@ -3,6 +3,7 @@ package rdb
 import (
 	"context"
 	"log"
+	"os"
 
 	avro "github.com/Reglament989/asynji/pkgs/pusher/avro"
 
@@ -14,9 +15,9 @@ const pusherChannel = "pusher"
 var ctx = context.Background()
 
 var rdb = redis.NewClient(&redis.Options{
-	Addr:     "localhost:6379",
-	Password: "", // no password set
-	DB:       0,  // use default DB
+	Addr:     os.Getenv("REDIS_URL"),
+	Password: os.Getenv("REDIS_PASS"), // no password set
+	DB:       0,                       // use default DB
 })
 
 func VerifyRdbConnection() {

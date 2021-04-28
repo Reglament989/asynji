@@ -23,6 +23,12 @@ func LoginRoute(c *gin.Context) {
 	}
 	token, refresh, err := models.NewUserLogin(body.Username, body.Password)
 	if err != nil {
+		if err.Error() == "mongo: no documents in result" {
+			c.JSON(400, gin.H{
+				"error": "Incorrect password",
+			})
+			return
+		}
 		c.JSON(500, gin.H{
 			"message": "Please try later",
 			"error":   err.Error(),

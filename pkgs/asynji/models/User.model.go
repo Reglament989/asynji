@@ -2,70 +2,73 @@ package models
 
 import (
 	"errors"
-	"log"
+	"fmt"
 
-	"github.com/kamva/mgm/v3"
-	"github.com/rs/xid"
+	"github.com/go-bongo/bongo"
 	"go.mongodb.org/mongo-driver/bson"
+	mbson "gopkg.in/mgo.v2/bson"
 
 	encry "github.com/Reglament989/asynji/pkgs/asynji/encryption"
 )
 
+type Invite struct {
+	From string
+	To   string
+	When string
+}
+
 type Update struct {
-	Event   string
-	Payload interface{}
+	Invites []Invite
 }
 
 type User struct {
-	mgm.DefaultModel `bson:", inline"`
-	Id               string
-	FcmTokens        []string
-	Username         string
-	Email            string
-	Password         string
-	PhotoUrl         string
-	Rooms            []string
-	BlackListTokens  []string
-	Updates          []Update
+	bongo.DocumentBase `bson:",inline"`
+	FcmTokens          []string
+	Username           string
+	Email              string
+	Password           string
+	PhotoUrl           string
+	Rooms              []string
+	BlackListTokens    []string
+	Updates            []Update
 }
 
 func NewUser(username string, email string, password string, photoUrl string) (string, error) {
-	if err := mgm.Coll(&User{}).First(bson.M{"username": username}, &User{}); err != nil {
-		if err.Error() == "mongo: no documents in result" {
-			if hashedPassword, err := encry.Hashing(password); err != nil {
-				return "", err
-			} else {
-				id := xid.New().String()
-				newUser := &User{
-					Id:       id,
-					Username: username,
-					Email:    email,
-					Password: hashedPassword,
-					PhotoUrl: photoUrl,
-					Rooms:    []string{},
-				}
-				if err := mgm.Coll(newUser).Create(newUser); err != nil {
-					return "", err
-				}
-				return id, nil
-			}
-		} else {
+	col := Conn.Collection("Users")
+	err := col.FindOne(bson.M{"username": username}, &User{})
+	if dnfError, ok := err.(*bongo.DocumentNotFoundError); ok {
+		hashedPassword, _ := encry.Hashing(password)
+		user := &User{
+			FcmTokens:       []string{},
+			Username:        username,
+			Password:        hashedPassword,
+			Email:           email,
+			PhotoUrl:        photoUrl,
+			Rooms:           []string{},
+			BlackListTokens: []string{},
+			Updates:         []Update{},
+		}
+		err := col.Save(user)
+		if err != nil {
 			return "", err
 		}
+		return user.GetId().Hex(), nil
 	} else {
-		return "", errors.New("User exists")
+		fmt.Println("real error " + err.Error())
+		return "", dnfError
 	}
 }
 
 func NewUserLogin(username string, password string) (string, string, error) {
+	col := Conn.Collection("Users")
 	user := &User{}
-	if err := mgm.Coll(user).First(bson.M{"username": username}, user); err != nil {
+	if err := col.FindOne(bson.M{"username": username}, user); err != nil {
 		return "", "", err
 	}
 	if err := encry.CompareHash(user.Password, password); err != nil {
 		return "", "", err
 	}
-	token, refresh, err := encry.CreateTokenPair(user.Id)
+	token, refresh, err := encry.CreateTokenPair(user.GetId().Hex())
 	if err != nil {
 		return "", "", err
 	}
@@ -81,8 +84,16 @@ func RefreshTokens(refreshToken string) (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
+	if StringInSlice(refreshToken, user.BlackListTokens) {
+		return "", "", errors.New("token invalid")
+	}
 	user.BlackListTokens = append(user.BlackListTokens, refreshToken)
-	token, refresh, err := encry.CreateTokenPair(user.ID.Hex())
+	err1 := Conn.Collection("Users").Save(user)
+	fmt.Printf("%v", user.BlackListTokens)
+	if err1 != nil {
+		return "", "", err1
+	}
+	token, refresh, err := encry.CreateTokenPair(user.GetId().Hex())
 	if err != nil {
 		return "", "", err
 	}
@@ -90,11 +101,21 @@ func RefreshTokens(refreshToken string) (string, string, error) {
 }
 
 func GetUser(userId string) (*User, error) {
-	log.Println("Get user", userId)
+	col := Conn.Collection("Users")
 	user := &User{}
-	if err := mgm.Coll(user).First(bson.M{"id": userId}, user); err != nil {
+	id := mbson.ObjectIdHex(userId)
+	if err := col.FindById(id, user); err != nil {
 		return &User{}, err
 	} else {
 		return user, nil
 	}
+}
+
+func StringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
 }

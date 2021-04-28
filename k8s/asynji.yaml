@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: asynji
+spec:
+  selector:
+    matchLabels:
+      app: asynji
+  template:
+    metadata:
+      labels:
+        app: asynji
+    spec:
+      containers:
+        - name: asynji
+          image: localhost:5000/asynji
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 8080
+          env:
+            - name: GIN_MODE
+              value: release
+            - name: MONGO_URI
+              value: mongodb://10.97.216.232:27017
+            - name: REDIS_URL
+              value: 10.102.47.87:6379
+            - name: REDIS_PASS
+              value: 5VFOr5FP3V

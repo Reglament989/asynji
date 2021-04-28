@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/Reglament989/asynji/pkgs/pusher/api"
 	"github.com/Reglament989/asynji/pkgs/pusher/avro"
@@ -15,12 +16,16 @@ const pusherChannel = "pusher"
 var ctx = context.Background()
 
 var rdb = redis.NewClient(&redis.Options{
-	Addr:     "localhost:6379",
+	Addr:     os.Getenv("REDIS_URL"),
 	Password: "", // no password set
 	DB:       0,  // use default DB
 })
 
 func main() {
+	status := rdb.Ping(ctx)
+	if status.Err() != nil {
+		panic(status.Err())
+	}
 	println("Pusher has started")
 	sub := rdb.Subscribe(ctx, pusherChannel)
 

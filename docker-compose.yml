@@ -6,35 +6,40 @@ services:
     restart: always
     volumes:
       - ./release/mongodata:/data/db
-    command: --quiet
+    logging:
+      driver: "none"
     # environment:
     #   MONGO_INITDB_ROOT_USERNAME: root
     #   MONGO_INITDB_ROOT_PASSWORD: example
-  gorush:
-    image: appleboy/gorush
-    container_name: gorush
+  rdb:
+    image: redis
+    container_name: rdb
     restart: always
-    volumes:
-      - ./gorush-config.yml:/config.yml
   pusher:
     image: golang
-    build: ./pkgs/pusher
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.pusher
     depends_on:
-      - gorush
+      - rdb
     container_name: pusher
     restart: always
     environment:
-      GORUSH_URL: http://gorush:8088
+      REDIS_URL: rdb:6379
   backend:
     image: golang
-    build: ./pkgs/asynji
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.asynji
     depends_on:
       - db
       - pusher
+      - rdb
     container_name: backend
     restart: always
     ports:
       - "8080:8080"
     environment:
       GIN_MODE: release
-      MONGO_URI: mongodb://db:27017
+      MONGO_URI: db:27017
+      REDIS_URL: rdb:6379

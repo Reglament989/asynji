@@ -45,8 +45,9 @@ android:
 
 huawei:
   enabled: false
-  appsecret: "YOUR_APP_SECRET"
-  appid: "YOUR_APP_ID"
+  enable: false
+  appsecret: "asdasd"
+  appid: "asdasd"
   max_retry: 0 # resend fail notification, default value zero is disabled
 
 ios:

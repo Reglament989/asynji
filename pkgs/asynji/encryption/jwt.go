@@ -13,7 +13,7 @@ func CreateToken(userid string, refresh bool) (string, error) {
 	if refresh {
 		atClaims["exp"] = time.Now().Add(time.Hour * 24 * 7).Unix()
 	} else {
-		atClaims["exp"] = time.Now().Add(time.Minute * 15).Unix()
+		atClaims["exp"] = time.Now().Add(time.Minute * 5).Unix()
 	}
 	at := jwt.NewWithClaims(jwt.SigningMethodHS512, atClaims)
 	token, err := at.SignedString([]byte("SUBKA"))

@@ -44,6 +44,10 @@ func InitGin() *gin.Engine {
 
 	roomScope.POST("/create", router.CreateRoomRoute)
 
-	roomScope.POST("/invite", router.InviteRoomRoute)
+	roomScope.POST("/:roomid/invite", router.InviteRoomRoute)
+
+	roomScope.POST("/:roomid/send", router.NewMessageRoute)
+
+	r.GET("/sync", middlewares.Auth(), router.GetLatestUpdates)
 	return r
 }

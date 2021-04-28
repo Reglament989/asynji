@@ -6,8 +6,7 @@ COPY . /go/src/asynji
 
 WORKDIR /go/src/asynji
 
-
-RUN go build
-RUN go install
+RUN cd ./pkgs/asynji && go build -o ../../asynji
+RUN cd ./pkgs/asynji && go install
 
 CMD ["asynji"]
