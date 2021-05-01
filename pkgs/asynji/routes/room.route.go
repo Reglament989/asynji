@@ -50,6 +50,8 @@ func CreateRoomRoute(c *gin.Context) {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
+	owner.Rooms = append(owner.Rooms, id)
+	owner.Save()
 	c.JSON(201, gin.H{
 		"roomId": id,
 	})
@@ -75,8 +77,14 @@ func InviteRoomRoute(c *gin.Context) {
 		})
 		return
 	}
-	if yeah, _ := models.StringInSlice(c.Param("userId"), room.Members); yeah {
-		message := room.InviteNewMembers(body.InvitedList, c.Param("userId"))
+	if yeah, _ := models.StringInSlice(c.GetString("userId"), room.Members); yeah {
+		if exists, _ := models.StringInSlice(c.GetString("userId"), body.InvitedList); exists {
+			c.JSON(400, gin.H{
+				"error": "You can't invite yourself",
+			})
+			return
+		}
+		message := room.InviteNewMembers(body.InvitedList, c.GetString("userId"))
 		if message == "All invites sended" {
 			c.JSON(201, gin.H{
 				"message": message,
@@ -98,7 +106,7 @@ func InviteRoomRoute(c *gin.Context) {
 func AcceptInviteRoute(c *gin.Context) {
 	roomid := c.Param("roomid")
 	inviteid := c.Param("inviteid")
-	user, err := models.GetUser(c.Param("userId"))
+	user, err := models.GetUser(c.GetString("userId"))
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -127,12 +135,19 @@ func DiscardInviteRoute(c *gin.Context) {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	if yeah, idx := models.StringInSlice(inviteid, room.InviteCodes); yeah {
-		models.Remove(room.InviteCodes, idx)
-		room.Save()
+	user, err := models.GetUser(c.GetString("userId"))
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	err = room.DiscardInvite(inviteid, user)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
 	}
 	c.JSON(200, gin.H{
-		"message": "Welcome to new room",
+		"message": "Discarded",
 	})
 }
 
@@ -172,6 +187,7 @@ func NewMessageRoute(c *gin.Context) {
 			"message": "Sended",
 			"id":      ids,
 		})
+		return
 	}
 	c.JSON(400, gin.H{
 		"message": "Room does not exists",

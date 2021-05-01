@@ -97,7 +97,6 @@ func RefreshTokens(refreshToken string) (string, string, error) {
 	}
 	user.BlackListTokens = append(user.BlackListTokens, refreshToken)
 	err1 := Conn.Collection("Users").Save(user)
-	fmt.Printf("%v", user.BlackListTokens)
 	if err1 != nil {
 		return "", "", err1
 	}

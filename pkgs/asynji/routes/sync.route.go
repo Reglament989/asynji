@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"strconv"
+
 	"github.com/Reglament989/asynji/pkgs/asynji/models"
 
 	"github.com/gin-gonic/gin"
@@ -18,14 +20,31 @@ func GetLatestUpdates(c *gin.Context) {
 		return
 	}
 	fullSync := c.DefaultQuery("full", "no")
-	var limit int = c.GetInt("limit")
-	var offset int = c.GetInt("offset")
+	limitString := c.DefaultQuery("limit", "0")
+	limit, err := strconv.ParseUint(limitString, 0, 64)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "Limit can be only > 0 and int64",
+		})
+		return
+	}
+	if limit == 0 {
+		limit = 60
+	}
+	offsetString := c.DefaultQuery("offset", "0")
+	offset, err := strconv.ParseUint(offsetString, 0, 64)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "Offset can be only > 0 and int64",
+		})
+		return
+	}
 	roomUpdates := make(map[string][]*models.Message)
 	if fullSync == "yes" {
-		limit = 0
+		limit = 2000
 	}
 	for idx := range user.Rooms {
-		messages, err1 := user.GetMessages(user.Rooms[idx], offset, limit)
+		messages, err1 := user.GetMessages(user.Rooms[idx], int(offset), int(limit))
 		if err1 != nil {
 			c.JSON(200, gin.H{
 				"error": err.Error(),

@@ -93,11 +93,37 @@ func (r *Room) AcceptInvite(inviteId string, user *User) error {
 	if yeah, idx := StringInSlice(inviteId, r.InviteCodes); yeah {
 		r.Members = append(r.Members, user.Id.Hex())
 		r.FcmTokens = append(r.FcmTokens, user.FcmTokens...)
-		Remove(r.InviteCodes, idx)
+		r.InviteCodes = Remove(r.InviteCodes, idx)
+		user.Rooms = append(user.Rooms, r.Id.Hex())
+		for idx := range user.Updates {
+			if user.Updates[idx].Invite.InviteId == inviteId {
+				user.Updates = removeUpdate(user.Updates, idx)
+				user.Save()
+				break
+			}
+		}
 		r.Save()
 		return nil
 	} else {
 		return errors.New("Invite code invalid")
+	}
+}
+
+func (r *Room) DiscardInvite(inviteid string, user *User) error {
+	if yeah, idx := StringInSlice(inviteid, r.InviteCodes); yeah {
+		println(idx)
+		r.InviteCodes = Remove(r.InviteCodes, idx)
+		for idx := range user.Updates {
+			if user.Updates[idx].Invite.InviteId == inviteid {
+				user.Updates = removeUpdate(user.Updates, idx)
+				user.Save()
+				break
+			}
+		}
+		r.Save()
+		return nil
+	} else {
+		return errors.New("invite code not valid")
 	}
 }
 
@@ -106,6 +132,11 @@ func GetCountOfAllRooms() (int, error) {
 }
 
 func Remove(s []string, i int) []string {
+	s[len(s)-1], s[i] = s[i], s[len(s)-1]
+	return s[:len(s)-1]
+}
+
+func removeUpdate(s []Update, i int) []Update {
 	s[len(s)-1], s[i] = s[i], s[len(s)-1]
 	return s[:len(s)-1]
 }
