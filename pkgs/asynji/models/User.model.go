@@ -32,6 +32,7 @@ type User struct {
 	Rooms              []string
 	BlackListTokens    []string
 	Updates            []Update
+	PublicKeys         []string
 }
 
 func (u *User) Save() {
@@ -53,6 +54,7 @@ func NewUser(username string, email string, password string, photoUrl string) (s
 			Rooms:           []string{},
 			BlackListTokens: []string{},
 			Updates:         []Update{},
+			PublicKeys:      []string{},
 		}
 		err := col.Save(user)
 		if err != nil {
@@ -115,6 +117,10 @@ func GetUser(userId string) (*User, error) {
 	} else {
 		return user, nil
 	}
+}
+
+func GetCountOfAllUsers() (int, error) {
+	return Conn.Collection("Users").Collection().Count()
 }
 
 func StringInSlice(a string, list []string) (bool, int) {

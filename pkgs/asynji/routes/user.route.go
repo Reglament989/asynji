@@ -57,9 +57,10 @@ func CreateUserRoute(c *gin.Context) {
 }
 
 type UploadFcmTokenBody struct {
-	Token string
+	Token string `json:"token" binding:"required"`
 }
 
+// [PUT] "/user/upload/fcm"
 func UploadFcmToken(c *gin.Context) {
 	var body UploadFcmTokenBody
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -77,5 +78,46 @@ func UploadFcmToken(c *gin.Context) {
 	user.Save()
 	c.JSON(200, gin.H{
 		"message": "Saved",
+	})
+}
+
+type UploadPublicKeyBody struct {
+	Key string `json:"key" binding:"required"`
+}
+
+// [PUT] "/user/upload/public"
+func UploadPublicKey(c *gin.Context) {
+	var body UploadPublicKeyBody
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	user, err := models.GetUser(c.GetString("userId"))
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	user.PublicKeys = append(user.PublicKeys, body.Key)
+	user.Save()
+	c.JSON(200, gin.H{
+		"message": "Saved",
+	})
+}
+
+// [GET] "/user/:userid/public"
+func GetPublicKey(c *gin.Context) {
+	userid := c.Param("userid")
+	gettenUser, err := models.GetUser(userid)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"message": "Successfull",
+		"key":     gettenUser.PublicKeys,
 	})
 }

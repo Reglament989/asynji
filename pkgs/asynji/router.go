@@ -29,24 +29,37 @@ func InitGin() *gin.Engine {
 	r.GET("/", router.IndexRoute)
 
 	// r.GET("/ws", ws.ListenChanges)
+	statsScope := r.Group("/stats")
 
-	userScope := r.Group("/user")
+	statsScope.GET("/users", router.GetInfoAboutAllUsers)
 
-	userScope.POST("/create", router.CreateUserRoute)
+	statsScope.GET("/rooms", router.GetStatsOfAllRooms)
 
-	userScope.POST("/upload/fcm", router.UploadFcmToken)
+	userScope := r.Group("/user", middlewares.Auth())
 
-	// userScope.POST("/upload/public", router.UploadFcmToken)
+	userUpload := userScope.Group("/upload")
 
-	// userScope.POST("/:userid/public", router.UploadFcmToken)
+	userUpload.PUT("/fcm", router.UploadFcmToken)
+
+	userUpload.PUT("/public", router.UploadPublicKey)
+
+	// userUpload.PUT("/avatar")
+
+	userScope.GET("/:userid/public", router.GetPublicKey)
 
 	authScope := r.Group("/auth")
 
 	authScope.POST("/login", router.LoginRoute)
 
-	authScope.POST("/refresh", router.RefreshRoute)
+	authScope.PATCH("/refresh", router.RefreshRoute)
+
+	authScope.PUT("/registration", router.CreateUserRoute)
 
 	roomScope := r.Group("/room", middlewares.Auth())
+
+	roomScope.GET("/:roomid", router.GetInfoAboutRoom)
+
+	roomScope.GET("/:roomid/count/messages", router.GetCountMessagesOfRoom)
 
 	roomScope.POST("/create", router.CreateRoomRoute)
 
@@ -54,10 +67,15 @@ func InitGin() *gin.Engine {
 
 	roomScope.GET("/:roomid/invite/:inviteid/resolve", router.AcceptInviteRoute)
 
-	roomScope.POST("/:roomid/invite/:inviteid/discard", router.DiscardInviteRoute)
+	roomScope.DELETE("/:roomid/invite/:inviteid/discard", router.DiscardInviteRoute)
 
 	roomScope.POST("/:roomid/send", router.NewMessageRoute)
 
-	r.GET("/sync", middlewares.Auth(), router.GetLatestUpdates)
+	globalScope := r.Group("/_", middlewares.Auth())
+
+	globalScope.GET("/sync", router.GetLatestUpdates)
+
+	// globalScope.PUT("/upload")
+
 	return r
 }

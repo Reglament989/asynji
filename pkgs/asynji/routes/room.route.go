@@ -177,3 +177,66 @@ func NewMessageRoute(c *gin.Context) {
 		"message": "Room does not exists",
 	})
 }
+
+// [GET] "/:roomid"
+func GetInfoAboutRoom(c *gin.Context) {
+	roomid := c.Param("roomid")
+	room, err := models.GetRoom(roomid)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	if room.Hidden {
+		user, err := models.GetUser(c.Param("userId"))
+		if err != nil {
+			c.JSON(400, gin.H{
+				"error": "Room not found",
+			})
+			return
+		}
+		if yeah, _ := models.StringInSlice(user.Id.Hex(), room.Members); !yeah {
+			c.JSON(500, gin.H{
+				"error": "Room not found",
+			})
+			return
+		}
+	}
+	c.JSON(200, gin.H{
+		"message": "Successfull",
+		"room":    room,
+	})
+}
+
+// [GET] "/:roomid/count/messages"
+func GetCountMessagesOfRoom(c *gin.Context) {
+	roomid := c.Param("roomid")
+	room, err := models.GetRoom(roomid)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	count, err := room.GetCountMessages()
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	if room.Hidden {
+		user, err := models.GetUser(c.Param("userId"))
+		if err != nil {
+			c.JSON(400, gin.H{
+				"error": "Room not found",
+			})
+			return
+		}
+		if yeah, _ := models.StringInSlice(user.Id.Hex(), room.Members); !yeah {
+			c.JSON(500, gin.H{
+				"error": "Room not found",
+			})
+			return
+		}
+	}
+	c.JSON(200, gin.H{
+		"message": "Successfull",
+		"count":   count,
+	})
+}

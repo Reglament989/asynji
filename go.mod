@@ -5,6 +5,7 @@ go 1.16
 require (
 	firebase.google.com/go v3.13.0+incompatible
 	firebase.google.com/go/v4 v4.5.0 // indirect
+	github.com/cosmtrek/air v1.27.3 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dgryski/go-metro v0.0.0-20200812162917-85c65e2d0165 // indirect
 	github.com/gin-gonic/gin v1.7.1

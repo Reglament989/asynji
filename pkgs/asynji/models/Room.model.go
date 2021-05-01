@@ -28,12 +28,10 @@ type Room struct {
 	RoomName           string
 	Avatar             string
 	Owner              string
-	InviteCode         string
 	Hidden             bool
 	Members            []string
-	Messages           []Message
-	FcmTokens          []string
-	InviteCodes        []string
+	FcmTokens          []string `json:"-"`
+	InviteCodes        []string `json:"-"`
 }
 
 func (r *Room) Save() {
@@ -47,10 +45,8 @@ func CreateNewRoom(roomName string, avatar string, owner string) (string, error)
 		RoomName:    roomName,
 		Avatar:      avatar,
 		Owner:       owner,
-		InviteCode:  xid.New().String(),
-		Hidden:      true,
+		Hidden:      false,
 		Members:     []string{owner},
-		Messages:    []Message{},
 		InviteCodes: []string{},
 	}
 	err := col.Save(newRoom)
@@ -103,6 +99,10 @@ func (r *Room) AcceptInvite(inviteId string, user *User) error {
 	} else {
 		return errors.New("Invite code invalid")
 	}
+}
+
+func GetCountOfAllRooms() (int, error) {
+	return Conn.Collection("Rooms").Collection().Count()
 }
 
 func Remove(s []string, i int) []string {

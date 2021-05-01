@@ -19,6 +19,10 @@ func (r *Room) NewMessage(from string, body string) (string, error) {
 	return message.Id.Hex(), nil
 }
 
+func (r *Room) GetCountMessages() (int, error) {
+	return Conn.Collection(fmt.Sprintf("%s-%s", r.Id.Hex(), "Messages")).Collection().Count()
+}
+
 func (u *User) GetMessages(room string, offset int, limit int) ([]*Message, error) {
 	col := Conn.Collection(fmt.Sprintf("%s-%s", room, "Messages"))
 	rp := col.Find(bson.M{})
