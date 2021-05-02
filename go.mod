@@ -11,6 +11,7 @@ require (
 	github.com/gin-gonic/gin v1.7.1
 	github.com/go-bongo/bongo v0.10.4 // indirect
 	github.com/go-redis/redis/v8 v8.8.2
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/kamva/mgm/v3 v3.1.0
 	github.com/linkedin/goavro/v2 v2.10.0

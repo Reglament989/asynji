@@ -35,7 +35,6 @@ func (u *User) GetMessages(room string, offset int, limit int) ([]*Message, erro
 	}
 	if err := iter.Close(); err != nil {
 		return nil, err
-
 	}
 	return messages, nil
 }

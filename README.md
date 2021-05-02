@@ -9,7 +9,7 @@
   * [Manual](#Manual)
     * [Build](#Build)
     * [Run](#Run)
-  * [Docker](#Docker)
+  * [Docker-Compose](#Docker)
     * [Build images](#Build-images)
     * [Run docker](#Run-docker)
 
@@ -32,8 +32,6 @@ git clone https://github.com/Reglament989/asynji.git
 ```
 openssl genrsa 4096 | openssl pkcs8 -topk8 -nocrypt > privateKey.pem
 ```
-
-[Docker-Compose]()
 
 ### Manual
 

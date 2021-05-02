@@ -2,10 +2,11 @@ package rdb
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"os"
 
-	avro "github.com/Reglament989/asynji/pkgs/pusher/avro"
+	"github.com/Reglament989/asynji/pkgs/pusher/ws"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -27,11 +28,12 @@ func VerifyRdbConnection() {
 	println("\033[32mRedis has connected!\033[39m")
 }
 
-func SendToPusherChannel(message string) {
-	pushMessage := avro.PushMessage{
-		Hello: message,
+func SendToPusherChannel(message string, recipients []string) {
+	pushMessage := ws.Event{
+		Recipients: recipients,
+		Body:       []byte(message),
 	}
-	payload, err := pushMessage.MarshalMessage()
+	payload, err := json.Marshal(pushMessage)
 	if err != nil {
 		log.Fatalln(err)
 	}
