@@ -6,8 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/Reglament989/asynji/pkgs/pusher/ws"
-
+	"github.com/Reglament989/asynji/pkgs/pusher/types"
 	"github.com/go-redis/redis/v8"
 )
 
@@ -29,9 +28,9 @@ func VerifyRdbConnection() {
 }
 
 func SendToPusherChannel(message string, roomTo string) {
-	pushMessage := ws.Event{
+	pushMessage := types.Event{
 		RoomTo: roomTo,
-		Body:   []byte(message),
+		Body:   message,
 	}
 	payload, err := json.Marshal(pushMessage)
 	if err != nil {

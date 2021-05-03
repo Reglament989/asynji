@@ -4,7 +4,6 @@ import (
 	"context"
 
 	firebase "firebase.google.com/go/v4"
-	"firebase.google.com/go/v4/messaging"
 
 	// "firebase.google.com/go/v4/auth"
 
@@ -25,13 +24,13 @@ func init() {
 }
 
 func PushNotify(data map[string]string, tokens []string) {
-	message := &messaging.MulticastMessage{
-		Data:   data,
-		Tokens: tokens,
-		Android: &messaging.AndroidConfig{
-			Priority: "high",
-		},
-	}
-	client, _ := app.Messaging(ctx)
-	client.SendMulticast(ctx, message)
+	// message := &messaging.MulticastMessage{
+	// 	Data:   data,
+	// 	Tokens: tokens,
+	// 	Android: &messaging.AndroidConfig{
+	// 		Priority: "high",
+	// 	},
+	// }
+	// client, _ := app.Messaging(ctx)
+	// client.SendMulticast(ctx, message)
 }

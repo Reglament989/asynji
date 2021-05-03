@@ -9,6 +9,7 @@ import (
 
 	"github.com/Reglament989/asynji/pkgs/pusher/microservice"
 	"github.com/Reglament989/asynji/pkgs/pusher/middleware"
+	"github.com/Reglament989/asynji/pkgs/pusher/mongo"
 	"github.com/joho/godotenv"
 
 	"github.com/Reglament989/asynji/pkgs/pusher/ws"
@@ -25,6 +26,8 @@ func init() {
 
 const pusherChannel = "pusher"
 
+const topicsChannel = "topics"
+
 var ctx = context.Background()
 
 var rdb = redis.NewClient(&redis.Options{
@@ -38,14 +41,18 @@ func main() {
 	if err != nil {
 		panic("Error loading .env file")
 	}
+	mongo.Init()
 	status := rdb.Ping(ctx)
 	if status.Err() != nil {
 		panic(status.Err())
 	}
 	hub := ws.NewHub()
 	go hub.Run()
-	sub := rdb.Subscribe(ctx, pusherChannel)
-	go microservice.ListenRedis(sub, hub)
+	go hub.TopicManager.Run()
+	subNotify := rdb.Subscribe(ctx, pusherChannel)
+	subTopics := rdb.Subscribe(context.Background(), topicsChannel)
+	go microservice.ListenRedis(subNotify, hub)
+	go microservice.UpdateTopics(subTopics, hub.TopicManager)
 
 	http.Handle("/", middleware.Middleware(
 		http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {

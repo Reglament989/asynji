@@ -9,7 +9,7 @@ import (
 
 var Conn *bongo.Connection
 
-func init() {
+func Init() {
 	config := &bongo.Config{
 		ConnectionString: os.Getenv("MONGO_URI"),
 		Database:         "bongotest",
