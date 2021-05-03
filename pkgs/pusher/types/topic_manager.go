@@ -61,7 +61,7 @@ func NewTopicManager() *TopicManager {
 
 func GetTopics() (map[string]*Topic, error) {
 	curs := mongo.Conn.Collection("Rooms").Find(nil)
-	query := curs.Query.Select(bson.M{"_id": 1, "FcmTokens": 1})
+	query := curs.Query.Select(bson.M{"_id": 1, "fcmtokens": 1})
 	room := &models.Room{}
 	topics := make(map[string]*Topic)
 	cursor := query.Iter()
