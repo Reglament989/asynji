@@ -5,8 +5,8 @@ import (
 	"github.com/Reglament989/asynji/pkgs/pusher/mongo"
 )
 
-func SendNotify(ids []string, message string) error {
-	tokens, err := mongo.SearchFcmByIds(ids)
+func SendNotify(roomTo string, message string) error {
+	tokens, err := mongo.SearchFcmByRoom(roomTo)
 	if err != nil {
 		return err
 	}

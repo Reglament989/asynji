@@ -28,10 +28,10 @@ func VerifyRdbConnection() {
 	println("\033[32mRedis has connected!\033[39m")
 }
 
-func SendToPusherChannel(message string, recipients []string) {
+func SendToPusherChannel(message string, roomTo string) {
 	pushMessage := ws.Event{
-		Recipients: recipients,
-		Body:       []byte(message),
+		RoomTo: roomTo,
+		Body:   []byte(message),
 	}
 	payload, err := json.Marshal(pushMessage)
 	if err != nil {

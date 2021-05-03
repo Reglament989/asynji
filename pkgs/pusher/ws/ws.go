@@ -25,8 +25,8 @@ var upgrader = websocket.Upgrader{
 }
 
 type Event struct {
-	Recipients []string
-	Body       []byte
+	RoomTo string
+	Body   []byte
 }
 
 type Hub struct {
@@ -60,14 +60,8 @@ func (c *Client) Writer() {
 				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
-
-			w, err := c.Conn.NextWriter(websocket.TextMessage)
+			err := c.Conn.WriteJSON(event)
 			if err != nil {
-				return
-			}
-			w.Write(event.Body)
-
-			if err := w.Close(); err != nil {
 				return
 			}
 		case <-ticker.C:
