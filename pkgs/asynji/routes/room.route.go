@@ -199,19 +199,17 @@ func GetInfoAboutRoom(c *gin.Context) {
 	roomid := c.Param("roomid")
 	room, err := models.GetRoom(roomid)
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(404, gin.H{"error": err.Error()})
 		return
 	}
 	if room.Hidden {
 		user, err := models.GetUser(c.Param("userId"))
 		if err != nil {
-			c.JSON(400, gin.H{
-				"error": "Room not found",
-			})
+			c.AbortWithStatus(500)
 			return
 		}
 		if yeah, _ := models.StringInSlice(user.Id.Hex(), room.Members); !yeah {
-			c.JSON(500, gin.H{
+			c.JSON(401, gin.H{
 				"error": "Room not found",
 			})
 			return
@@ -228,7 +226,7 @@ func GetCountMessagesOfRoom(c *gin.Context) {
 	roomid := c.Param("roomid")
 	room, err := models.GetRoom(roomid)
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(404, gin.H{"error": err.Error()})
 		return
 	}
 	count, err := room.GetCountMessages()
@@ -239,13 +237,11 @@ func GetCountMessagesOfRoom(c *gin.Context) {
 	if room.Hidden {
 		user, err := models.GetUser(c.Param("userId"))
 		if err != nil {
-			c.JSON(400, gin.H{
-				"error": "Room not found",
-			})
+			c.JSON(500, gin.H{"error": err.Error()})
 			return
 		}
 		if yeah, _ := models.StringInSlice(user.Id.Hex(), room.Members); !yeah {
-			c.JSON(500, gin.H{
+			c.JSON(401, gin.H{
 				"error": "Room not found",
 			})
 			return

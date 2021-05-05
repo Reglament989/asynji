@@ -56,7 +56,7 @@ func RefreshRoute(c *gin.Context) {
 	}
 	token, refresh, err := models.RefreshTokens(body.RefreshToken)
 	if err != nil {
-		c.JSON(200, gin.H{
+		c.JSON(401, gin.H{
 			"error": err.Error(),
 		})
 		return

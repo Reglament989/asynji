@@ -45,7 +45,7 @@ func CreateUserRoute(c *gin.Context) {
 		return
 	}
 	if userId, err := models.NewUser(body.Username, body.Email, body.Password, ""); err != nil {
-		c.JSON(200, gin.H{
+		c.JSON(409, gin.H{
 			"error": err.Error(),
 		})
 		return
