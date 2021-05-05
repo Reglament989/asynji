@@ -1,0 +1,19 @@
+_id: spc_70c0b82addcd4278aec2cf5528c336ca
+type: ApiSpec
+parentId: wrk_595eef94807447a4b9d9cc39d703a5ba
+modified: 1620213381709
+created: 1620213148036
+fileName: asynji-spec
+contents: |-
+  swagger: "2.0"
+  info:
+    description: "Asynji - backend for one name messenger"
+    version: "0.0.1 Pre Alfa"
+    title: "Asynji"
+    termsOfService: "http://swagger.io/terms/"
+    contact:
+      email: "dudecom@tuta.io"
+    license:
+      name: "GPL-3.0 License"
+      url: "https://github.com/Reglament989/asynji/blob/main/LICENSE"
+contentType: yaml
