@@ -1,0 +1,13 @@
+FROM golang
+
+# EXPOSE 8080:8080
+
+COPY . /go/src/pusher
+
+WORKDIR /go/src/pusher
+
+
+RUN cd ./pkgs/pusher && go build -o ../../pusher
+# RUN cd ./pkgs/pusher && go install
+
+CMD ["pusher"]

@@ -1,0 +1,12 @@
+FROM golang
+
+EXPOSE 8080:8080
+
+COPY . /go/src/asynji
+
+WORKDIR /go/src/asynji
+
+RUN cd ./pkgs/asynji && go build -o ../../asynji
+RUN cd ./pkgs/asynji && go install
+
+CMD ["asynji"]

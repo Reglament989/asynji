@@ -1,0 +1,45 @@
+version: "3"
+services:
+  db:
+    image: mongo
+    container_name: db
+    restart: always
+    volumes:
+      - ./release/mongodata:/data/db
+    logging:
+      driver: "none"
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: root
+    #   MONGO_INITDB_ROOT_PASSWORD: example
+  rdb:
+    image: redis
+    container_name: rdb
+    restart: always
+  pusher:
+    image: golang
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.pusher
+    depends_on:
+      - rdb
+    container_name: pusher
+    restart: always
+    environment:
+      REDIS_URL: rdb:6379
+  backend:
+    image: golang
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.asynji
+    depends_on:
+      - db
+      - pusher
+      - rdb
+    container_name: backend
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      GIN_MODE: release
+      MONGO_URI: db:27017
+      REDIS_URL: rdb:6379
