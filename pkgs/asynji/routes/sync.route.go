@@ -21,7 +21,7 @@ func GetLatestUpdates(c *gin.Context) {
 	}
 	fullSync := c.DefaultQuery("full", "no")
 	limitString := c.DefaultQuery("limit", "0")
-	limit, err := strconv.ParseUint(limitString, 0, 64)
+	limit, err := strconv.ParseInt(limitString, 0, 64)
 	if err != nil {
 		c.JSON(400, gin.H{
 			"error": "Limit can be only > 0 and int64",
@@ -32,7 +32,7 @@ func GetLatestUpdates(c *gin.Context) {
 		limit = 60
 	}
 	offsetString := c.DefaultQuery("offset", "0")
-	offset, err := strconv.ParseUint(offsetString, 0, 64)
+	offset, err := strconv.ParseInt(offsetString, 0, 64)
 	if err != nil {
 		c.JSON(400, gin.H{
 			"error": "Offset can be only > 0 and int64",
@@ -44,7 +44,7 @@ func GetLatestUpdates(c *gin.Context) {
 		limit = 2000
 	}
 	for idx := range user.Rooms {
-		messages, err1 := user.GetMessages(user.Rooms[idx], int(offset), int(limit))
+		messages, err1 := user.GetMessages(user.Rooms[idx], offset, limit)
 		if err1 != nil {
 			c.JSON(200, gin.H{
 				"error": err.Error(),
