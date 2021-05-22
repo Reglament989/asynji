@@ -11,7 +11,7 @@ dev-asynji:
 	cd pkgs/asynji && air 
 
 build:
-	mkdir build
+	mkdir build -p
 	cd pkgs/asynji && go build -o ../../build/asynji-$(VERSION)
 	cd pkgs/pusher && go build -o ../../build/push-service-$(VERSION)
 	go test -v ./...
