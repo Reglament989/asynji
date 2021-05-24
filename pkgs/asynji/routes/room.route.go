@@ -10,7 +10,7 @@ import (
 )
 
 type CreateRoomBody struct {
-	RoomName string `json:"roomName"`
+	RoomName string `json:"room_name"`
 	Avatar   string `json:"avatar"`
 }
 
