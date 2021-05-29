@@ -2,7 +2,7 @@ VERSION ?= $(shell git describe --tags --always || git rev-parse --short HEAD)
 
 
 dev:
-	cd pkgs/asynji && air & cd pkgs/pusher && air
+	cd pkgs/asynji && air & cd pkgs/pusher && air & cd pkgs/f-manager && air
 
 dev-pusher:
 	cd pkgs/pusher && air

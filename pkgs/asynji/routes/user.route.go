@@ -15,6 +15,7 @@ type CreateUserBody struct {
 	Email    string `json:"email" binding:"required"`
 }
 
+// [POST] /user/create
 func CreateUserRoute(c *gin.Context) {
 	var body CreateUserBody
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -119,5 +120,21 @@ func GetPublicKey(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "Successfull",
 		"key":     gettenUser.PublicKeys,
+	})
+}
+
+// [GET] "/user/:userid"
+func GetInfoAboutUserRoute(c *gin.Context) {
+	userid := c.Param("userid")
+	gettenUser, err := models.GetUser(userid)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"message": "Successfull",
+		"user":    gettenUser,
 	})
 }

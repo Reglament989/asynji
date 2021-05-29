@@ -24,14 +24,14 @@ type Update struct {
 
 type User struct {
 	bongo.DocumentBase `bson:",inline"`
-	FcmTokens          []string
+	FcmTokens          []string `json:"-"`
 	Username           string
-	Email              string
-	Password           string
+	Email              string `json:"-"`
+	Password           string `json:"-"`
 	PhotoUrl           string
-	Rooms              []string
-	BlackListTokens    []string
-	Updates            []Update
+	Rooms              []string `json:"-"`
+	BlackListTokens    []string `json:"-"`
+	Updates            []Update `json:"-"`
 	PublicKeys         []string
 }
 

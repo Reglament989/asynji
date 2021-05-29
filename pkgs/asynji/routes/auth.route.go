@@ -36,9 +36,9 @@ func LoginRoute(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{
-		"token":        token,
-		"refreshToken": refresh,
-		"message":      "Welcome back!",
+		"token":         token,
+		"refresh_token": refresh,
+		"message":       "Welcome back!",
 	})
 }
 
