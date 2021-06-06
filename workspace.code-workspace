@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "pkgs/asynji"
+		},
+		{
+			"path": "pkgs/pusher"
+		},
+		{
+			"path": "pkgs/f-manager"
+		}
+	],
+	"settings": {}
+}
